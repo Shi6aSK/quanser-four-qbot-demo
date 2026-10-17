@@ -577,7 +577,7 @@ between dollar signs and display math between double dollar signs.
 For any angle \(\theta\), normalization to \([-\pi,\pi)\) is
 
 $$
-\operatorname{wrap}(\theta)
+\mathrm{wrap}(\theta)
 = ((\theta+\pi)\bmod 2\pi)-\pi .
 $$
 
@@ -603,7 +603,7 @@ $$
 \theta_{\mathrm{mid}} &= \theta_k + \frac{1}{2}\omega\Delta t,\\
 x_{k+1} &= x_k + v\cos(\theta_{\mathrm{mid}})\Delta t,\\
 y_{k+1} &= y_k + v\sin(\theta_{\mathrm{mid}})\Delta t,\\
-\theta_{k+1} &= \operatorname{wrap}(\theta_k+\omega\Delta t).
+\theta_{k+1} &= \mathrm{wrap}(\theta_k+\omega\Delta t).
 \end{aligned}
 $$
 
@@ -618,7 +618,7 @@ $$
 $$
 d=\sqrt{(\Delta x)^2+(\Delta y)^2},
 \qquad
-b=\operatorname{wrap}\left(\operatorname{atan2}(\Delta y,\Delta x)-\theta\right).
+b=\mathrm{wrap}\left(\mathrm{atan2}(\Delta y,\Delta x)-\theta\right).
 $$
 
 The distance bin is
@@ -662,8 +662,8 @@ Let
 
 $$
 \phi_h=
-\operatorname{wrap}\left(
-\operatorname{atan2}(y_h-y,x_h-x)-\theta
+\mathrm{wrap}\left(
+\mathrm{atan2}(y_h-y,x_h-x)-\theta
 \right).
 $$
 
@@ -722,10 +722,10 @@ The training policy is
 $$
 a_k\sim
 \begin{cases}
-\operatorname{Uniform}(\mathcal A),&u<\epsilon,\\
-\operatorname*{arg\,max}_{a\in\mathcal A}Q(s_k,a),&u\ge\epsilon,
+\mathrm{Uniform}(\mathcal A),&u<\epsilon,\\
+\mathrm{arg\,max}_{a\in\mathcal A}Q(s_k,a),&u\ge\epsilon,
 \end{cases}
-\qquad u\sim\operatorname{Uniform}(0,1).
+\qquad u\sim\mathrm{Uniform}(0,1).
 $$
 
 Ties in the argmax set are sampled uniformly. Exploration decays as

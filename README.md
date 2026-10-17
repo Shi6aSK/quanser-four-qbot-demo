@@ -215,7 +215,7 @@ $$
 \theta_m &= \theta+\frac{\omega\Delta t}{2},\\
 x' &= x+v\cos(\theta_m)\Delta t,\\
 y' &= y+v\sin(\theta_m)\Delta t,\\
-\theta' &= \operatorname{wrap}(\theta+\omega\Delta t).
+\theta' &= \mathrm{wrap}(\theta+\omega\Delta t).
 \end{aligned}
 $$
 
