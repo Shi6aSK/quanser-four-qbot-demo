@@ -278,7 +278,7 @@ classDiagram
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Loop as Experiment loop
+    participant Runner as Experiment loop
     participant Pose as PoseTracker
     participant QLabs as QLabs actor API
     participant Net as RLV2VNode
@@ -286,7 +286,7 @@ sequenceDiagram
     participant Driver as QBot driver
     participant Metrics as Recorder and plotter
 
-    Loop->>Pose: update_odometry(drivers)
+    Runner->>Pose: update_odometry(drivers)
     opt A correction is due
         Pose->>QLabs: get_world_transform(one bot)
         alt Valid response
@@ -296,17 +296,17 @@ sequenceDiagram
             Pose->>Pose: increment query_misses
         end
     end
-    Loop->>Net: receive_latest()
-    Net-->>Loop: newest message per peer
-    Loop->>Agent: blend_peer_values(state, values)
-    Loop->>Loop: calculate state, distance, clearance
-    Loop->>Agent: update(previous transition)
-    Loop->>Agent: choose_action(current state)
-    Agent-->>Loop: action index
-    Loop->>Driver: read_write_std(command)
-    Driver-->>Loop: wheel speeds and battery
-    Loop->>Net: broadcast(RLMessage)
-    Loop->>Metrics: write(row) and add(row)
+    Runner->>Net: receive_latest()
+    Net-->>Runner: newest message per peer
+    Runner->>Agent: blend_peer_values(state, values)
+    Runner->>Runner: calculate state, distance, clearance
+    Runner->>Agent: update(previous transition)
+    Runner->>Agent: choose_action(current state)
+    Agent-->>Runner: action index
+    Runner->>Driver: read_write_std(command)
+    Driver-->>Runner: wheel speeds and battery
+    Runner->>Net: broadcast(RLMessage)
+    Runner->>Metrics: write(row) and add(row)
 ```
 
 The agent, driver, network, and metric operations repeat once per robot.
@@ -569,61 +569,61 @@ This is decentralized policy sharing: each robot retains its own table and actio
 
 ## Mathematical reference
 
-This section uses GitHub-supported LaTeX delimiters. GitHub renders inline math
-between dollar signs and display math between double dollar signs.
+This section uses GitHub-supported LaTeX delimiters. Inline expressions use
+dollar signs, while display expressions use fenced `math` blocks.
 
 ### Angle normalization
 
-For any angle \(\theta\), normalization to \([-\pi,\pi)\) is
+For any angle $\theta$, normalization to $[-\pi,\pi)$ is
 
-$$
+```math
 \mathrm{wrap}(\theta)
 = ((\theta+\pi)\bmod 2\pi)-\pi .
-$$
+```
 
 ### Differential-drive forward kinematics
 
-Given wheel radius \(r\), wheel separation \(L\), and measured left/right wheel
-angular velocities \(\omega_L,\omega_R\),
+Given wheel radius $r$, wheel separation $L$, and measured left/right wheel
+angular velocities $\omega_L,\omega_R$,
 
-$$
+```math
 v = \frac{r}{2}(\omega_L+\omega_R),
 \qquad
 \omega = \frac{r}{L}(\omega_R-\omega_L).
-$$
+```
 
 The first quantity is body-forward velocity and the second is body yaw rate.
 
 ### Midpoint pose integration
 
-For pose \((x_k,y_k,\theta_k)\) and interval \(\Delta t\),
+For pose $(x_k,y_k,\theta_k)$ and interval $\Delta t$,
 
-$$
+```math
 \begin{aligned}
 \theta_{\mathrm{mid}} &= \theta_k + \frac{1}{2}\omega\Delta t,\\
 x_{k+1} &= x_k + v\cos(\theta_{\mathrm{mid}})\Delta t,\\
 y_{k+1} &= y_k + v\sin(\theta_{\mathrm{mid}})\Delta t,\\
 \theta_{k+1} &= \mathrm{wrap}(\theta_k+\omega\Delta t).
 \end{aligned}
-$$
+```
 
 ### Target geometry
 
-For target \((x_t,y_t)\),
+For target $(x_t,y_t)$,
 
-$$
+```math
 \Delta x=x_t-x,\qquad \Delta y=y_t-y,
-$$
+```
 
-$$
+```math
 d=\sqrt{(\Delta x)^2+(\Delta y)^2},
 \qquad
 b=\mathrm{wrap}\left(\mathrm{atan2}(\Delta y,\Delta x)-\theta\right).
-$$
+```
 
 The distance bin is
 
-$$
+```math
 D(d)=
 \begin{cases}
 0,&d<0.25,\\
@@ -631,157 +631,157 @@ D(d)=
 2,&0.75\le d<1.50,\\
 3,&d\ge1.50.
 \end{cases}
-$$
+```
 
 The eight-sector bearing bin is
 
-$$
+```math
 B(b)=
 \left\lfloor
 \frac{b+\pi}{2\pi}\,8
 \right\rfloor \bmod 8.
-$$
+```
 
 ### Hazard geometry
 
-For robot center \((x,y)\), hazard center \((x_h,y_h)\), robot radius \(r_r\),
-and hazard radius \(r_h\),
+For robot center $(x,y)$, hazard center $(x_h,y_h)$, robot radius $r_r$,
+and hazard radius $r_h$,
 
-$$
+```math
 c_h=
 \sqrt{(x_h-x)^2+(y_h-y)^2}-r_h-r_r.
-$$
+```
 
 The logged nearest clearance is
 
-$$
+```math
 c_{\min}=\min_{h\in\mathcal H} c_h.
-$$
+```
 
 Let
 
-$$
+```math
 \phi_h=
 \mathrm{wrap}\left(
 \mathrm{atan2}(y_h-y,x_h-x)-\theta
 \right).
-$$
+```
 
 The front-obstacle bit is
 
-$$
+```math
 F=
 \begin{cases}
 1,&\exists h:\ c_h<0.42\ \land\ |\phi_h|<65^\circ,\\
 0,&\text{otherwise}.
 \end{cases}
-$$
+```
 
-The complete state key is \(s=(D,B,F)\), stored as the string D:B:F.
+The complete state key is $s=(D,B,F)$, stored as the string `D:B:F`.
 
 ### Reward
 
 Progress from one step to the next is
 
-$$
+```math
 p_k=d_{k-1}-d_k.
-$$
+```
 
-Using indicator notation \(\mathbf 1[\cdot]\), the implemented reward is
+Using indicator notation $\mathbf 1[\cdot]$, the implemented reward is
 
-$$
+```math
 r_k =
 8p_k-0.02
 -0.25\,\mathbf 1[c_{\min}<0.20]
 -5\,\mathbf 1[\text{collision}]
 +10\,\mathbf 1[d_k<0.25].
-$$
+```
 
 ### Q-learning update
 
-For learning rate \(\alpha=0.25\) and discount \(\gamma=0.92\),
+For learning rate $\alpha=0.25$ and discount $\gamma=0.92$,
 
-$$
+```math
 y_k=
 \begin{cases}
 r_k,&\text{terminal},\\
 r_k+\gamma\max_{a'}Q(s_{k+1},a'),&\text{otherwise},
 \end{cases}
-$$
+```
 
-$$
+```math
 Q(s_k,a_k)
 \leftarrow
 Q(s_k,a_k)+\alpha\left[y_k-Q(s_k,a_k)\right].
-$$
+```
 
 ### Epsilon-greedy policy
 
 The training policy is
 
-$$
+```math
 a_k\sim
 \begin{cases}
 \mathrm{Uniform}(\mathcal A),&u<\epsilon,\\
 \mathrm{arg\,max}_{a\in\mathcal A}Q(s_k,a),&u\ge\epsilon,
 \end{cases}
 \qquad u\sim\mathrm{Uniform}(0,1).
-$$
+```
 
 Ties in the argmax set are sampled uniformly. Exploration decays as
 
-$$
+```math
 \epsilon_{e+1}=\max(0.05,\ 0.94\epsilon_e).
-$$
+```
 
 ### Distributed Q-row consensus
 
-When agent \(i\) receives agent \(j\)'s values for state \(s\),
+When agent $i$ receives agent $j$'s values for state $s$,
 
-$$
+```math
 \mathbf Q_i(s)
 \leftarrow
 (1-\beta)\mathbf Q_i(s)+\beta\mathbf Q_j(s),
 \qquad \beta=0.15.
-$$
+```
 
-Here \(\mathbf Q(s)\in\mathbb R^6\) contains one value per discrete action.
+Here $\mathbf Q(s)\in\mathbb R^6$ contains one value per discrete action.
 
 ### Network metrics
 
-For consecutive sender sequence numbers \(n_{\mathrm{old}}\) and
-\(n_{\mathrm{new}}\), inferred loss is
+For consecutive sender sequence numbers $n_{\mathrm{old}}$ and
+$n_{\mathrm{new}}$, inferred loss is
 
-$$
+```math
 N_{\mathrm{lost}}
 =
 \max\left(0,n_{\mathrm{new}}-n_{\mathrm{old}}-1\right).
-$$
+```
 
 Message age is
 
-$$
+```math
 t_{\mathrm{age,ms}}
 =1000\left(t_{\mathrm{receive}}-t_{\mathrm{send}}\right).
-$$
+```
 
 ### Control scheduling
 
-For requested control rate \(f\), nominal step time is
+For requested control rate $f$, nominal step time is
 
-$$
+```math
 T_s=\frac{1}{f}.
-$$
+```
 
 The loop sleeps for
 
-$$
+```math
 t_{\mathrm{sleep}}
 =\max(0,t_{\mathrm{deadline}}-t_{\mathrm{now}}).
-$$
+```
 
 The control-period CSV column records the actual period rather than assuming it
-equals \(1000/f\).
+equals $1000/f$.
 
 ## UDP communication
 
