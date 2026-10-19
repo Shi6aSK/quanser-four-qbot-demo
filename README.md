@@ -7,6 +7,14 @@ targets, avoid obstacles and one another, and share Q-values over UDP.
 The project also includes a small leader/follower demo for checking the
 simulator and network setup before starting a training run.
 
+## Demo
+
+[![Four-QBot training dashboard](docs/dashboard.png)](docs/demo_run_web.mp4)
+
+[Watch the four-QBot demo video](docs/demo_run_web.mp4) (1 minute 46 seconds).
+The dashboard tracks each robot's path, reward, target distance, and network
+traffic while the experiment is running.
+
 ## What it does
 
 - Spawns four independently controlled QBot Platforms.
@@ -247,8 +255,6 @@ Important CSV fields include pose/source, target distance, clearance, state,
 action, reward, collision and target flags, wheel speeds, packet counts,
 message age, pose-query misses, and actual loop period.
 
-![Example training dashboard](docs/dashboard.png)
-
 ## Project layout
 
 ```text
@@ -261,6 +267,7 @@ four_qbot_demo/
 ├── requirements.txt
 ├── docs/
 │   ├── dashboard.png
+│   ├── demo_run_web.mp4
 │   └── technical-reference.md
 ├── README.md
 └── LICENSE

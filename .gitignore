@@ -10,3 +10,6 @@ venv/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Keep the original recording locally; commit the web-encoded copy instead.
+/docs/demo_run.mp4
